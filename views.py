@@ -1,17 +1,21 @@
-from django.shortcuts import render
-#from django.http import HttpResponse
-from .models import Post
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from .forms import UserRegisterForm
 from django.contrib.auth.decorators import login_required
 
-@login_required()
-def home(request):
-    context = {
-        'posts': Post.objects.all()
-    }
-    return render(request, 'blog/home.html', context)
-@login_required()
-def about(request):
-    return render(request, 'blog/about.html', {'title' : 'About'} )
-def base(request):
-    return render(request, 'blog/base.html')
+def register(request):
+    if request.method == 'POST':
+        form = UserRegisterForm(request.POST)
+        if form.is_valid():
+            form.save()
+            username = form.cleaned_data.get('username')
+            messages.success(request, f'Account created for {username} you can now login')
+            return redirect('login')
+    else:
+        form = UserRegisterForm()
+    return render(request, 'users/register.html', {'form':form})
 
+@login_required()
+def profile(request):
+     return render(request, 'users/profile.html')
+# Create your views here.
